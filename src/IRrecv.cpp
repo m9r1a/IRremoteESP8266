@@ -296,7 +296,7 @@ IRrecv::IRrecv(const uint16_t recvpin, const uint16_t bufsize,
   // Ensure we are going to be able to store all possible values in the
   // capture buffer.
   params.timeout = std::min(timeout, (uint8_t)kMaxTimeoutMs);
-  params.rawbuf = new uint16_t[bufsize];
+  params.rawbuf = new uint32_t[bufsize];
   if (params.rawbuf == NULL) {
     DPRINTLN(
         "Could not allocate memory for the primary IR buffer.\n"
@@ -308,7 +308,7 @@ IRrecv::IRrecv(const uint16_t recvpin, const uint16_t bufsize,
   // If we have been asked to use a save buffer (for decoding), then create one.
   if (save_buffer) {
     params_save = new irparams_t;
-    params_save->rawbuf = new uint16_t[bufsize];
+    params_save->rawbuf = new uint32_t[bufsize];
     // Check we allocated the memory successfully.
     if (params_save->rawbuf == NULL) {
       DPRINTLN(
@@ -444,7 +444,7 @@ void IRrecv::copyIrParams(volatile irparams_t *src, irparams_t *dst) {
   // Save the pointer to the destination's rawbuf so we don't lose it as
   // the for-loop/copy after this will overwrite it with src's rawbuf pointer.
   // This isn't immediately obvious due to typecasting/different variable names.
-  uint16_t *dst_rawbuf_ptr;
+  uint32_t *dst_rawbuf_ptr;
   dst_rawbuf_ptr = dst->rawbuf;
 
   // Copy contents of src[] to dst[]
@@ -1421,7 +1421,7 @@ bool IRrecv::decodeHash(decode_results *results) {
 /// @return A match_result_t structure containing the success (or not), the
 ///   data value, and how many buffer entries were used.
 match_result_t IRrecv::matchData(
-    volatile uint16_t *data_ptr, const uint16_t nbits, const uint16_t onemark,
+    volatile uint32_t *data_ptr, const uint16_t nbits, const uint16_t onemark,
     const uint32_t onespace, const uint16_t zeromark, const uint32_t zerospace,
     const uint8_t tolerance, const int16_t excess, const bool MSBfirst,
     const bool expectlastspace) {
@@ -1481,7 +1481,7 @@ match_result_t IRrecv::matchData(
 ///   true is Most Significant Bit First Order, false is Least Significant First
 /// @param[in] expectlastspace Do we expect a space at the end of the message?
 /// @return If successful, how many buffer entries were used. Otherwise 0.
-uint16_t IRrecv::matchBytes(volatile uint16_t *data_ptr, uint8_t *result_ptr,
+uint16_t IRrecv::matchBytes(volatile uint32_t *data_ptr, uint8_t *result_ptr,
                             const uint16_t remaining, const uint16_t nbytes,
                             const uint16_t onemark, const uint32_t onespace,
                             const uint16_t zeromark, const uint32_t zerospace,
@@ -1533,7 +1533,7 @@ uint16_t IRrecv::matchBytes(volatile uint16_t *data_ptr, uint8_t *result_ptr,
 /// @param[in] MSBfirst Bit order to save the data in. (Def: true)
 ///   true is Most Significant Bit First Order, false is Least Significant First
 /// @return If successful, how many buffer entries were used. Otherwise 0.
-uint16_t IRrecv::_matchGeneric(volatile uint16_t *data_ptr,
+uint16_t IRrecv::_matchGeneric(volatile uint32_t *data_ptr,
                               uint64_t *result_bits_ptr,
                               uint8_t *result_bytes_ptr,
                               const bool use_bits,
@@ -1635,7 +1635,7 @@ uint16_t IRrecv::_matchGeneric(volatile uint16_t *data_ptr,
 /// @param[in] MSBfirst Bit order to save the data in. (Def: true)
 ///   true is Most Significant Bit First Order, false is Least Significant First
 /// @return If successful, how many buffer entries were used. Otherwise 0.
-uint16_t IRrecv::matchGeneric(volatile uint16_t *data_ptr,
+uint16_t IRrecv::matchGeneric(volatile uint32_t *data_ptr,
                               uint64_t *result_ptr,
                               const uint16_t remaining,
                               const uint16_t nbits,
@@ -1682,7 +1682,7 @@ uint16_t IRrecv::matchGeneric(volatile uint16_t *data_ptr,
 /// @param[in] MSBfirst Bit order to save the data in. (Def: true)
 ///   true is Most Significant Bit First Order, false is Least Significant First
 /// @return If successful, how many buffer entries were used. Otherwise 0.
-uint16_t IRrecv::matchGeneric(volatile uint16_t *data_ptr,
+uint16_t IRrecv::matchGeneric(volatile uint32_t *data_ptr,
                               uint8_t *result_ptr,
                               const uint16_t remaining,
                               const uint16_t nbits,
@@ -1729,7 +1729,7 @@ uint16_t IRrecv::matchGeneric(volatile uint16_t *data_ptr,
 /// @return If successful, how many buffer entries were used. Otherwise 0.
 /// @note Parameters one + zero add up to the total time for a bit.
 ///   e.g. mark(one) + space(zero) is a `1`, mark(zero) + space(one) is a `0`.
-uint16_t IRrecv::matchGenericConstBitTime(volatile uint16_t *data_ptr,
+uint16_t IRrecv::matchGenericConstBitTime(volatile uint32_t *data_ptr,
                                           uint64_t *result_ptr,
                                           const uint16_t remaining,
                                           const uint16_t nbits,
@@ -1816,7 +1816,7 @@ uint16_t IRrecv::matchGenericConstBitTime(volatile uint16_t *data_ptr,
 /// @return If successful, how many buffer entries were used. Otherwise 0.
 /// @see https://en.wikipedia.org/wiki/Manchester_code
 /// @see http://ww1.microchip.com/downloads/en/AppNotes/Atmel-9164-Manchester-Coding-Basics_Application-Note.pdf
-uint16_t IRrecv::matchManchester(volatile const uint16_t *data_ptr,
+uint16_t IRrecv::matchManchester(volatile const uint32_t *data_ptr,
                                  uint64_t *result_ptr,
                                  const uint16_t remaining,
                                  const uint16_t nbits,
@@ -1923,7 +1923,7 @@ uint16_t IRrecv::matchManchester(volatile const uint16_t *data_ptr,
 /// @see https://en.wikipedia.org/wiki/Manchester_code
 /// @see http://ww1.microchip.com/downloads/en/AppNotes/Atmel-9164-Manchester-Coding-Basics_Application-Note.pdf
 /// @todo Clean up and optimise this. It is just "get it working code" atm.
-uint16_t IRrecv::matchManchesterData(volatile const uint16_t *data_ptr,
+uint16_t IRrecv::matchManchesterData(volatile const uint32_t *data_ptr,
                                      uint64_t *result_ptr,
                                      const uint16_t remaining,
                                      const uint16_t nbits,

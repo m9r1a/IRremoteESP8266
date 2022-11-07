@@ -423,17 +423,17 @@ String resultToHumanReadableBasic(const decode_results * const results) {
 /// @return A PTR to a dynamically allocated uint16_t sendRaw compatible array.
 /// @note The returned array needs to be delete[]'ed/free()'ed (deallocated)
 ///  after use by caller.
-uint16_t* resultToRawArray(const decode_results * const decode) {
-  uint16_t *result = new uint16_t[getCorrectedRawLength(decode)];
+uint32_t* resultToRawArray(const decode_results * const decode) {
+  uint32_t *result = new uint32_t[getCorrectedRawLength(decode)];
   if (result != NULL) {  // The memory was allocated successfully.
     // Convert the decode data.
     uint16_t pos = 0;
     for (uint16_t i = 1; i < decode->rawlen; i++) {
       uint32_t usecs = decode->rawbuf[i] * kRawTick;
-      while (usecs > UINT16_MAX) {  // Keep truncating till it fits.
-        result[pos++] = UINT16_MAX;
+      while (usecs > UINT32_MAX) {  // Keep truncating till it fits.
+        result[pos++] = UINT32_MAX;
         result[pos++] = 0;  // A 0 in a sendRaw() array basically means skip.
-        usecs -= UINT16_MAX;
+        usecs -= UINT32_MAX;
       }
       result[pos++] = usecs;
     }
